@@ -8,7 +8,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
@@ -91,22 +93,17 @@ public class MainActivity extends AppCompatActivity {
                 obsList.add(obs4);
                 obsList.add(obs5);
 
-                //  Single.zip(obs1,obs2,mergeEmittedItems()).subscribe()
-                //  Observable.zip(obs1, obs2, obs3).subscribe();
-//                        (Object o1,Object o2, Object o3) -> o1 + " " + o2 + " " + " " + o3).subscribe(str ->
-//                        Log.d("SettingsObs","Observable zip : " + str));
-                Observable.merge(obs1, obs2, obs3,obs4)
+                Observable.merge(Arrays.asList(obs1, obs2, obs3,obs4,obs5 ))
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Observer<Object>() {
                             @Override
                             public void onSubscribe(@NonNull Disposable d) {
-                                Log.d("single", "onSubscribe: ");
+                                Log.d("single", "onSubscribe observables: ");
                             }
 
                             @Override
                             public void onNext(@NonNull Object o) {
                                 Log.d("single", "onNext: " +  o);
-
                             }
 
                             @Override
@@ -116,6 +113,40 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onComplete() {
                                 Log.d("single", "finished: ");
+                            }
+                        });
+
+
+                Single<Object> sin1 = Single.create(emitter -> {
+                    Log.d("single", "s1");
+                    emitter.onSuccess("s1");
+                });
+                Single<Object> sin2 = Single.create(emitter -> {
+                    Log.d("single", "s2");
+                    emitter.onSuccess("s2");
+                });
+                ArrayList<Single> sinList = new ArrayList<>();
+                sinList.add(sin1);
+                sinList.add(sin2);
+
+                Observable.merge(sin1.toObservable(),sin2.toObservable())
+                        .subscribe(new Observer<Object>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+                                Log.d("single", "onSubscribe: singles" );
+                            }
+
+                            @Override
+                            public void onNext(Object o) {
+                                Log.d("single", "onNext: " +  o);
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+                            }
+
+                            @Override
+                            public void onComplete() {
                             }
                         });
             }
